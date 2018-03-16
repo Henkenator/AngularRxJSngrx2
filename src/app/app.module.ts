@@ -4,11 +4,13 @@ import { NgModule } from '@angular/core';
 
 import { AppComponent } from './app.component';
 import {AppStoreModule} from '../store';
+import {Clock} from './clock';
 
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    Clock
   ],
   imports: [
     BrowserModule, AppStoreModule

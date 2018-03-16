@@ -1,2 +1,6 @@
-<button (click)="click$.next()">Update</button>
-<h1>{{clock | async | date:'medium'}}</h1>
+<input #inputNum type="number" value="0">
+<button (click)="click$.next(inputNum.value)">Update</button>
+<!--<h1>{{clock | async | date:'medium'}}</h1>-->
+<clock [time]="time | async"></clock>
+<div (click)="person$.next(person)" *ngFor="let person of people | async">{{person.name}} is in {{person.time | date:'hh:mm:ss'}}</div>
+<button (click)="recall$.next()">recall</button>

@@ -6,9 +6,10 @@ import 'rxjs/add/observable/interval';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/mapTo';
 import 'rxjs/add/operator/startWith';
+import 'rxjs/add/operator/withLatestFrom';
 import 'rxjs/add/operator/scan';
 import {select, Store} from '@ngrx/store';
-import {HOUR, SECOND} from '../reducers';
+import {ADVANCE, HOUR, RECALL, SECOND} from '../reducers';
 
 @Component({
   selector: 'app-root',
@@ -16,37 +17,34 @@ import {HOUR, SECOND} from '../reducers';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  click$ = new Subject();
 
-  clock;
+  person$ = new Subject()
+    .map((value) => ({type: ADVANCE, payload: value}));
+
+  recall$ = new Subject();
+
+  click$ = new Subject()
+    .map(value => ({type: HOUR, payload: parseInt(value)}));
+
+  seconds$ = Observable
+    .interval(1000)
+    .mapTo({type: SECOND, payload: 1});
+
+  time;
+  people;
 
   constructor(store: Store<any>) {
-    this.clock = store.pipe(select('clock'));
+    this.time = store.pipe(select('clock'));
+    this.people = store.pipe(select('people'));
 
     Observable.merge(
-      this.click$.mapTo(HOUR),
-      Observable.interval(1000).mapTo(SECOND)
-    ).subscribe((type) => {
-      store.dispatch({type});
-    });
+      this.click$,
+      this.seconds$,
+      this.person$,
+      this.recall$
+        .withLatestFrom(this.time, (_, y) => y)
+        .map((time) => ({type: RECALL, payload: time}))
+    ).subscribe(store.dispatch.bind(store));
 
   }
-
-
-  /*
-   .scan((acc: Date, curr) => {
-   const date = new Date(acc.getTime());
-
-   if (curr === 'second') {
-   date.setSeconds(date.getSeconds() + 1);
-   }
-
-   if (curr === 'hour') {
-   date.setHours(date.getHours() + 1);
-   }
-
-   return date;
-   }, new Date());
-   */
-
 }
